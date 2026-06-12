@@ -1,14 +1,16 @@
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypedDict, Any
+from typing import Any, TypedDict
 
 
 class Config(TypedDict):
     edk2_path: str
+    qemu_path: str
     active_platform: str
     tool_chain_tag: str
     target_arch: str
     max_concurrent_thread_number: int
+    project_name: str
     loader_name: str
     version: str
     function_in: str

@@ -2,7 +2,6 @@ import subprocess
 
 from utils import color_print, datatype
 from utils.color_print import Color
-from utils.functions import program_exit
 
 
 def shell_run(tasks: list[datatype.Task], task_contents: datatype.TaskContexts):
@@ -18,12 +17,11 @@ def shell_run(tasks: list[datatype.Task], task_contents: datatype.TaskContexts):
                 text=True,
                 check=True
                 )
-        except subprocess.CalledProcessError:
-            program_exit(
-                1,
+        except subprocess.CalledProcessError as error:
+            raise RuntimeError(
                 f"\r[{num + 1}/{task_contents.total_num}] "\
-                f"{task['Message']} -> 실패.{"":<5}",
-                Color.RED)
+                f"{task['Message']} -> 실패.{"":<5}\n"\
+                f"{error}") from error
         color_print.write(
             f"\r[{num + 1}/{task_contents.total_num}] "\
             f"{task['Message']} -> 완료.{"":<5}",
@@ -43,13 +41,12 @@ def func_run(
             Color.BLUE, end="")
         try:
             func(context)
-        except Exception:
-            program_exit(
-                1,
+        except (FileNotFoundError, PermissionError) as error:
+            raise RuntimeError(
                 f"\r[{(task_contents.shell_task_num + num) + 1}/"\
                 f"{task_contents.total_num}] "\
-                f"{func_task['Message']} -> 실패.{"":<5}",
-                Color.RED)
+                f"{func_task['Message']} -> 실패.{"":<5}\n"
+                f"{error}") from error
         color_print.write(
             f"\r[{(task_contents.shell_task_num + num) + 1}/"\
             f"{task_contents.total_num}] "\

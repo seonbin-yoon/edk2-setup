@@ -3,30 +3,14 @@ import os
 import sys
 from typing import cast
 
-from system import edk2
+from system import edk2, qemu
 from utils import color_print, datatype, system
 from utils.color_print import Color
 from utils.functions import program_exit
 
 
-def main():
-    processing_config(contexts.config)
-    show_message()
-
-    while True:
-        _input = color_print.read("메뉴 입력 > ")
-        if not _input:
-            continue
-
-        for mapping in __MAPPING:
-            if _input in mapping["Command"]:
-                if mapping["Argu"]:
-                    check_error(mapping["Exec"](contexts))
-                else:
-                    mapping["Exec"]()
-                break
-        else:
-            color_print.write("없는 기능을 지정했습니다..", Color.RED)
+def show_message():
+    color_print.write(__COMMANDS, Color.YELLOW, end="\n\n")
 
 def get_config() -> datatype.Config:
     config = configparser.ConfigParser()
@@ -45,17 +29,13 @@ def processing_config(config: datatype.Config):
             new_value = value.replace("!Home", contexts.home)
             config[key] = new_value
 
-    if not config["max_concurrent_thread_number"]:
+    if config["max_concurrent_thread_number"]:
         threads = system.get_threads()
         if threads is None:
             color_print.write("논리 쓰레드 갯수를 알 수 없습니다.\n" \
             "1로 사용합니다.", Color.RED)
             threads = 0
         config["max_concurrent_thread_number"] = (threads * 2) + 1
-
-def show_message():
-    color_print.write("Auto-Setup에 오신 것을 환영합니다!", Color.MAGENTA)
-    color_print.write(__COMMANDS, Color.YELLOW, end="\n\n")
 
 def check_error(result: bool):
     if result:
@@ -83,8 +63,8 @@ __MAPPING: list[datatype.ShellCommand] = [
     },
     {
         "Argu": True,
-        "Command": ("de",),
-        "Exec": edk2.delete
+        "Command": ("qe",),
+        "Exec": qemu.install
     },
     {
         "Argu": False,
@@ -93,12 +73,12 @@ __MAPPING: list[datatype.ShellCommand] = [
     },
     {
         "Argu": False,
-        "Command":("cls", "clear"),
+        "Command":("clear", "cls"),
         "Exec": color_print.clear_screen,
     },
     {
         "Argu": False,
-        "Command": ("e", "exit"),
+        "Command": ("exit", "e"),
         "Exec": program_exit
     },
     {
@@ -110,12 +90,34 @@ __MAPPING: list[datatype.ShellCommand] = [
 
 __COMMANDS = (
     "ie    : edk2 설치\n"
-    "de    : edk2 삭제\n"
+    "qe    : qemu 설치\n"
+    "-------------------------\n"
     "help  : 명령어 목록 보기\n"
-    "cls   : 화면 초기화\n"
+    "clear : 화면 초기화\n"
     "color : 컬러 출력 끄기/켜기\n"
-    "e    : 프로그램 나가기"
+    "exit  : 프로그램 나가기"
 )
+
+def main():
+    processing_config(contexts.config)
+    color_print.clear_screen()
+    color_print.write("Auto-Setup에 오신 것을 환영합니다!", Color.MAGENTA)
+    show_message()
+
+    while True:
+        _input = color_print.read("메뉴 입력 > ")
+        if not _input:
+            continue
+
+        for mapping in __MAPPING:
+            if _input in mapping["Command"]:
+                if mapping["Argu"]:
+                    check_error(mapping["Exec"](contexts))
+                else:
+                    mapping["Exec"]()
+                break
+        else:
+            color_print.write("없는 기능을 지정했습니다..", Color.RED)
 
 if __name__ == "__main__":
     try:

@@ -24,7 +24,11 @@ package_install: datatype.Task = {
         "libuuid-devel",
         "acpica-tools",
         "git",
-        "nasm"
+        "nasm",
+        "qemu-kvm",
+        "libvirt",
+        "virt-install",
+        "virt-manager"
         ]
 }
 
