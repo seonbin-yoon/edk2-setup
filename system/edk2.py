@@ -4,6 +4,7 @@ import os
 from python_data.edk2 import all_func, all_shell
 from system import execute
 from utils import check, color_print, datatype
+from utils._except import Edk2Except, RunExcept, SettingError
 from utils.color_print import Color
 
 
@@ -11,7 +12,7 @@ def install(program_context: datatype.Contexts) -> bool:
     start_time = datetime.datetime.now()
     try:
         _wake(program_context.config)
-    except (FileExistsError, NotImplementedError) as error_message:
+    except (Edk2Except.Edk2ExistsError, Edk2Except.NotDockerError) as error_message:
         color_print.write(error_message, Color.RED)
         return False
 
@@ -31,7 +32,7 @@ def install(program_context: datatype.Contexts) -> bool:
     try:
         execute.shell_run(shell_tasks, task_contexts)
         execute.func_run(func_tasks, task_contexts, program_context)
-    except RuntimeError as error_message:
+    except RunExcept.FailedRunError as error_message:
         color_print.write(error_message, Color.RED)
         return False
 
@@ -47,7 +48,7 @@ def _wake(config: datatype.Config):
 
     color_print.write("\r미설치 여부 검사 -> ...", Color.YELLOW, end="")
     if os.path.exists(config["edk2_path"]):
-        raise FileExistsError(
+        raise Edk2Except.Edk2ExistsError(
             "\r설치 여부 검사 -> 실패\n" \
             "이미 edk2 폴더가 존재하므로 더 이상 진행할 수 없습니다."
             )
@@ -56,7 +57,7 @@ def _wake(config: datatype.Config):
     color_print.write("docker 컨테이너 여부 검사 -> ...", Color.BLUE)
     try:
         __check_is_docker()
-    except NotImplementedError as error:
+    except Edk2Except.NotDockerError as error:
         _input = color_print.read("현재 프로그램이 실행중인 곳이 " \
         "docker 컨테이너 내부가 아닌 것 같습니다.\n" \
         "전역에 설치를 할 경우 패키지 꼬임, " \
@@ -65,13 +66,13 @@ def _wake(config: datatype.Config):
         "여기에 입력 > ", Color.RED)
         if _input != "y":
             color_print.write("취소합니다.", Color.YELLOW)
-            raise NotImplementedError from error
+            raise Edk2Except.NotDockerError from error
 
     color_print.write("\r설정 파일 내용 검사 -> ...", Color.YELLOW, end="")
     try:
         check.edk2_config(config)
-    except NotImplementedError as error_message:
-        raise NotImplementedError(error_message) from error_message
+    except SettingError.InvalidSettingError as error_message:
+        raise SettingError.InvalidSettingError(error_message) from error_message
     color_print.write("\r설정 파일 내용 검사 -> 통과", Color.GREEN)
 
 def __check_is_docker():
@@ -85,25 +86,26 @@ def __check_is_docker():
     except FileNotFoundError:
         pass
 
-    raise NotImplementedError
+    raise Edk2Except.NotDockerError
 
-def _get_shell_task_lists(distro: str) -> list[datatype.Task]:
+def _get_shell_task_lists(distro: str) -> list[datatype.ShellTask]:
     if distro == "RHEL":
-        from python_data.edk2.RHEL import rhel_command
-        task = rhel_command.install_tasks
-        task.extend(all_shell.c_install_tasks)
+        from python_data.edk2.RHEL import rhel
+        task = rhel.install_tasks
     elif distro == "DEBIAN":
-        raise NotImplementedError
+        from python_data.edk2.DEBIAN import debian
+        task = debian.install_tasks
     else:
         raise NotImplementedError
 
+    task.extend(all_shell.install_tasks)
     return task
 
-def _get_func_task_lists() -> list[datatype.Function]:
+def _get_func_task_lists() -> list[datatype.FunctionTask]:
     return all_func.install_tasks
 
 def _processing_tasks(
-        raw_tasks: list[datatype.Task],
+        raw_tasks: list[datatype.ShellTask],
         program_context: datatype.Contexts):
 
     for task in raw_tasks:
