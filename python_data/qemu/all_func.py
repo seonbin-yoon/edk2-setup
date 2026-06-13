@@ -13,7 +13,7 @@ def copy_uefi_image(context: datatype.Contexts):
     qemu_path = context.config["qemu_path"]
     shutil.copy2(uefi_image_path, qemu_path)
 
-install_tasks: list[datatype.Function] = [
+install_tasks: list[datatype.FunctionTask] = [
     {
         "Message": "qemu 전용 폴더 생성",
         "Func": make_qemu_dir
