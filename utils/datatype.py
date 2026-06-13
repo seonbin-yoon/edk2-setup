@@ -15,12 +15,12 @@ class Config(TypedDict):
     version: str
     function_in: str
 
-class Task(TypedDict):
+class ShellTask(TypedDict):
     Message: str
     Path: str
     Exec: list[str]
 
-class Function(TypedDict):
+class FunctionTask(TypedDict):
     Message: str
     Func: Callable[..., None]
 
