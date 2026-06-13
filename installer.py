@@ -5,6 +5,7 @@ from typing import cast
 
 from system import edk2, qemu
 from utils import color_print, datatype, system
+from utils._except import InitError
 from utils.color_print import Color
 from utils.functions import program_exit
 
@@ -17,7 +18,7 @@ def get_config() -> datatype.Config:
 
     file = config.read("user.cfg")
     if not file:
-        raise FileNotFoundError
+        raise InitError.ConfigNotFoundError
 
     detail = config["Config"]
     return cast(datatype.Config, dict(detail))
@@ -48,9 +49,9 @@ try:
         home=os.path.expanduser("~"),
         program=os.path.dirname(sys.argv[0])
     )
-except FileNotFoundError:
+except InitError.ConfigNotFoundError:
     program_exit(1, "설정 파일을 찾을 수 없습니다.", Color.RED)
-except NotImplementedError as os_name:
+except InitError.UnsupportedOSError as os_name:
     program_exit(1, f"{os_name}는 지원되는 OS가 아닙니다.", Color.RED)
 except Exception:
     program_exit(1, "프로그램 초기화중 오류가 발생했습니다.", Color.RED)

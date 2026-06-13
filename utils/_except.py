@@ -27,3 +27,14 @@ class SettingError:
     class InvalidSettingError(Exception):
         """설정값이 유효하지 않음"""
         pass
+
+class InitError:
+    """초기화와 관련된 모든 에러"""
+    class UnsupportedOSError(Exception):
+        """지원되지 않는 OS"""
+        pass
+
+    class ConfigNotFoundError(Exception):
+        """설정 파일을 찾을 수 없음"""
+        pass
+
