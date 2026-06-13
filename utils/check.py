@@ -1,4 +1,5 @@
 from utils import datatype
+from utils._except import SettingError
 
 EDK_BASIC_CHECKS = [
         {
@@ -56,8 +57,9 @@ def edk2_config(config: datatype.Config):
             error_list.append(extra_check["Message"] + "\n")
 
     if error_list:
-        raise NotImplementedError("".join(error_list))
+        raise SettingError.InvalidSettingError("".join(error_list))
 
 def qemu_config(config: datatype.Config):
     if len(config["qemu_path"].split("/")) < 3:
-        raise NotImplementedError("root 바로 밑에 qemu 폴더를 생성할 수 없습니다.")
+        raise SettingError.InvalidSettingError(
+            "root 바로 밑에 qemu 폴더를 생성할 수 없습니다.")
