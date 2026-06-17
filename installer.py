@@ -40,6 +40,9 @@ def processing_config(config: datatype.Config):
 
 def check_error(result: bool):
     if result:
+        color_print.write(
+            "모든 변경 사항이 잘 반영되게 재로그인을 권장합니다!", Color.YELLOW
+            )
         color_print.write("작업을 성공적으로 완료 했습니다.", Color.BLUE)
 
 try:
