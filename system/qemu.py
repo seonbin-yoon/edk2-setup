@@ -1,6 +1,6 @@
 import os
 
-from python_data.qemu import all_func
+from python_data.qemu import all_func, all_shell
 from system import execute
 from utils import check, color_print, datatype
 from utils._except import QemuExcept, RunExcept, SettingError
@@ -73,4 +73,5 @@ def _get_shell_tasks(program_context: datatype.Contexts) -> list[datatype.ShellT
     else:
         raise NotImplementedError
 
+    task.extend(all_shell.install_task)
     return task
