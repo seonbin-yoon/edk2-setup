@@ -1,3 +1,4 @@
+import os
 import platform
 
 import distro
@@ -25,3 +26,10 @@ def get_distro() -> str:
 
 def get_threads():
     return psutil.cpu_count(logical=True)
+
+def get_home_path() -> str:
+    path = os.path.expanduser("~")
+    if path == "~":
+        raise InitError.HomePathNotFoundError
+
+    return path

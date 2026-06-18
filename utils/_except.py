@@ -46,3 +46,7 @@ class InitError:
         """설정 파일을 찾을 수 없음"""
         pass
 
+    class HomePathNotFoundError(Exception):
+        """홈 경로를 알 수 없음"""
+        pass
+

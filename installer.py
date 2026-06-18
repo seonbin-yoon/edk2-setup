@@ -27,7 +27,7 @@ def processing_config(config: datatype.Config):
     for key, value in config.items():
         value = cast(str, value)
         if "!Home" in value:
-            new_value = value.replace("!Home", contexts.home)
+            new_value = value.replace("!Home", program_contexts.home)
             config[key] = new_value
 
     if config["max_concurrent_thread_number"]:
@@ -38,7 +38,7 @@ def processing_config(config: datatype.Config):
             threads = 0
         config["max_concurrent_thread_number"] = (threads * 2) + 1
 
-def check_error(result: bool):
+def check_done(result: bool):
     if result:
         color_print.write(
             "모든 변경 사항이 잘 반영되게 재로그인을 권장합니다!", Color.YELLOW
@@ -46,16 +46,18 @@ def check_error(result: bool):
         color_print.write("작업을 성공적으로 완료 했습니다.", Color.BLUE)
 
 try:
-    contexts = datatype.Contexts(
+    program_contexts = datatype.Contexts(
         config=get_config(),
         distro=system.get_distro(),
-        home=os.path.expanduser("~"),
+        home=system.get_home_path(),
         program=os.path.dirname(sys.argv[0])
     )
 except InitError.ConfigNotFoundError:
     program_exit(1, "설정 파일을 찾을 수 없습니다.", Color.RED)
 except InitError.UnsupportedOSError as os_name:
     program_exit(1, f"{os_name}는 지원되는 OS가 아닙니다.", Color.RED)
+except InitError.HomePathNotFoundError:
+    program_exit(1, "사용자 기본 폴더를 찾을 수 없습니다.", Color.RED)
 except Exception:
     program_exit(1, "프로그램 초기화중 오류가 발생했습니다.", Color.RED)
 
@@ -103,7 +105,7 @@ __COMMANDS = (
 )
 
 def main():
-    processing_config(contexts.config)
+    processing_config(program_contexts.config)
     color_print.clear_screen()
     color_print.write("자동 설치 프로그램에 오신 것을 환영합니다!", Color.MAGENTA)
     show_message()
@@ -116,7 +118,7 @@ def main():
         for mapping in __MAPPING:
             if _input in mapping["Command"]:
                 if mapping["Argu"]:
-                    check_error(mapping["Exec"](contexts))
+                    check_done(mapping["Exec"](program_contexts))
                 else:
                     mapping["Exec"]()
                 break
