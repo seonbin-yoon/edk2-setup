@@ -10,9 +10,6 @@ from modules.system import program_exit
 from system import edk2, qemu
 
 
-def show_message():
-    console.write(__COMMANDS, Color.YELLOW, end="\n\n")
-
 def get_config() -> datatype.Config:
     config = configparser.ConfigParser()
 
@@ -23,12 +20,12 @@ def get_config() -> datatype.Config:
     detail = config["Config"]
     return cast(datatype.Config, dict(detail))
 
-def processing_config(config: datatype.Config):
-    for key, value in config.items():
+def replace_config_values(config: datatype.Config):
+    for setting, value in config.items():
         value = cast(str, value)
         if "!Home" in value:
-            new_value = value.replace("!Home", program_contexts.home)
-            config[key] = new_value
+            replaced_value = value.replace("!Home", program_contexts.home)
+            config[setting] = replaced_value
 
     if config["max_concurrent_thread_number"]:
         threads = system.get_threads()
@@ -37,6 +34,9 @@ def processing_config(config: datatype.Config):
             "1로 사용합니다.", Color.RED)
             threads = 0
         config["max_concurrent_thread_number"] = (threads * 2) + 1
+
+def show_message():
+    console.write(__COMMANDS, Color.YELLOW, end="\n\n")
 
 def check_done(result: bool):
     if result:
@@ -105,7 +105,7 @@ __COMMANDS = (
 )
 
 def main():
-    processing_config(program_contexts.config)
+    replace_config_values(program_contexts.config)
     console.clear_screen()
     console.write("자동 설치 프로그램에 오신 것을 환영합니다!", Color.MAGENTA)
     show_message()
