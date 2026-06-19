@@ -1,12 +1,12 @@
 import datetime
 import os
 
+from command_modules.qemu import all_func, all_shell
 from modules import check, console, datatype
 from modules._except import QemuExcept, RunExcept, SettingError
 from modules.console import Color
 from modules.functions import get_spend_time
 from modules.system import check_need_sudo
-from python_data.qemu import all_func, all_shell
 from system import execute
 
 
@@ -81,10 +81,10 @@ def _get_sudo():
 
 def _get_shell_tasks(program_context: datatype.Contexts) -> list[datatype.ShellTask]:
     if program_context.distro == "RHEL":
-        from python_data.qemu.RHEL import rhel
+        from command_modules.qemu.RHEL import rhel
         task = rhel.install_tasks
     elif program_context.distro == "DEBIAN":
-        from python_data.qemu.DEBIAN import debian
+        from command_modules.qemu.DEBIAN import debian
         task = debian.install_tasks
     else:
         raise NotImplementedError

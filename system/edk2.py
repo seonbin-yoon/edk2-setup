@@ -1,12 +1,12 @@
 import datetime
 import os
 
+from command_modules.edk2 import all_func, all_shell
 from modules import check, console, datatype
 from modules._except import Edk2Except, RunExcept, SettingError
 from modules.console import Color
 from modules.functions import get_spend_time
 from modules.system import check_need_sudo
-from python_data.edk2 import all_func, all_shell
 from system import execute
 
 
@@ -118,10 +118,10 @@ def _get_sudo():
 
 def _get_shell_task_lists(distro: str) -> list[datatype.ShellTask]:
     if distro == "RHEL":
-        from python_data.edk2.RHEL import rhel
+        from command_modules.edk2.RHEL import rhel
         task = rhel.install_tasks
     elif distro == "DEBIAN":
-        from python_data.edk2.DEBIAN import debian
+        from command_modules.edk2.DEBIAN import debian
         task = debian.install_tasks
     else:
         raise NotImplementedError
