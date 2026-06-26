@@ -1,6 +1,6 @@
+from include import check_list as check_list
 from modules import datatype
 from modules._except import SettingError
-from modules.include import check_check_list as check_list
 
 
 def edk2_config(config: datatype.Config):
